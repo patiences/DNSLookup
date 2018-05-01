@@ -2,6 +2,8 @@ package ca.ubc.cs.cs317.dnslookup;
 
 import java.io.Serializable;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /** 
  * DNS nodes can be used to specify an individual DNS query or the key to a specific result.
  * Each node represents a fully-qualified domain name (represented by hostName) and a record
@@ -27,7 +29,7 @@ public class DNSNode implements Comparable<DNSNode>, Serializable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 

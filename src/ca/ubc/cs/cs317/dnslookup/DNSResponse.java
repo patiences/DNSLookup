@@ -2,6 +2,8 @@ package ca.ubc.cs.cs317.dnslookup;
 
 import java.util.*;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * Encapsulates a DNS Response.
  */
@@ -9,7 +11,7 @@ public class DNSResponse {
 
     public int transactionId;
     public byte[] byteData;
-    public DNSNode DNSNode;
+    public @Nullable DNSNode DNSNode;
     public int qdCount;
     public int anCount;
     public int nsCount;

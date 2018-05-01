@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.util.Date;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /** A resource record corresponds to each individual result returned by a DNS response. It links
  * a DNS node (host name and record type) to either an IP address (e.g., A or AAAA records) or
  * a textual response (e.g., CNAME or NS records). A TTL (time-to-live) field is also specified,
@@ -15,13 +17,12 @@ public class ResourceRecord implements Serializable {
 	private DNSNode node;
     private Date expirationTime;
     private String textResult;
-    private InetAddress inetResult;
+    private @Nullable InetAddress inetResult;
 
     public ResourceRecord(String hostName, RecordType type, long ttl, String result) {
         this.node = new DNSNode(hostName, type);
         this.expirationTime = new Date(System.currentTimeMillis() + (ttl * 1000));
         this.textResult = result;
-        this.inetResult = null;
     }
 
     public ResourceRecord(String hostName, RecordType type, long ttl, InetAddress result) {
@@ -78,12 +79,12 @@ public class ResourceRecord implements Serializable {
         return textResult;
     }
 
-    public InetAddress getInetResult() {
+    public @Nullable InetAddress getInetResult() {
         return inetResult;
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
@@ -91,7 +92,16 @@ public class ResourceRecord implements Serializable {
 
         if (!node.equals(record.node)) return false;
         if (!textResult.equals(record.textResult)) return false;
-        return inetResult != null ? inetResult.equals(record.inetResult) : record.inetResult == null;
+        
+        if (inetResult != null) {
+        		if (record.inetResult != null) {
+        			return inetResult.equals(record.inetResult);
+        		} else {
+        			return true; // both null 
+        		}
+        } else {
+        		return false; 
+        }
     }
 
     @Override

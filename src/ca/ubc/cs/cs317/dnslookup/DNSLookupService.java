@@ -3,6 +3,9 @@ package ca.ubc.cs.cs317.dnslookup;
 import java.io.Console;
 import java.net.*;
 import java.util.*;
+
+import org.checkerframework.checker.nullness.qual.*;
+
 import java.io.*;
 
 public class DNSLookupService {
@@ -12,9 +15,9 @@ public class DNSLookupService {
     // The maximum number of redirections handled 
     private static final int MAX_INDIRECTION_LEVEL = 10;
 
-    private static InetAddress rootServer;
+    private @MonotonicNonNull static InetAddress rootServer;
     private static boolean verboseTracing = false;
-    private static DatagramSocket socket;
+    private @MonotonicNonNull static DatagramSocket socket;
 
     private static DNSCache cache = DNSCache.getInstance();
 
@@ -144,7 +147,7 @@ public class DNSLookupService {
         // Close the scanner 
         in.close();
         // Close the socket 
-        socket.close();
+        	socket.close();
         
         System.out.println("Goodbye!");
     }
@@ -183,7 +186,8 @@ public class DNSLookupService {
         Set<ResourceRecord> cachedResults = cache.getCachedResults(node);
         if (cachedResults.isEmpty()) {
             // Send the query to the root server 
-            retrieveResultsFromServer(node, rootServer);
+        		if (rootServer != null)
+        			retrieveResultsFromServer(node, rootServer);
         }
 
         // If we are not looking for a CNAME record
@@ -208,7 +212,7 @@ public class DNSLookupService {
      * @param node   Host name and record type to be used for the query.
      * @param server Address of the server to be used for the query.
      */
-    private static void retrieveResultsFromServer(DNSNode node, InetAddress server) {
+    private static void retrieveResultsFromServer(DNSNode node, @NonNull InetAddress server) {
 
     		/* Create a DNS query*/
     	
@@ -277,7 +281,9 @@ public class DNSLookupService {
                         if (nextServerRecord.getInetResult() != null) {
                             InetAddress nextAddress = nextServerRecord.getInetResult();
                             // Repeat the query with this server
-                            retrieveResultsFromServer(node, nextAddress);
+                            if (nextAddress != null)
+                            		retrieveResultsFromServer(node, nextAddress);
+                            
                             return;
                         }
                     }
@@ -294,7 +300,8 @@ public class DNSLookupService {
                                 if (rr.getInetResult() != null) {
                                     // Found the next server to query
                                     InetAddress nextAddress = rr.getInetResult();
-                                    retrieveResultsFromServer(node, nextAddress);
+                                    if (nextAddress != null)
+                                    		retrieveResultsFromServer(node, nextAddress);
                                     return;
                                 }
                             }
@@ -327,12 +334,20 @@ public class DNSLookupService {
                     queryData.id, queryData.hostName, queryData.type,
                     queryData.server.getHostAddress());
         }
-        socket.send(dnsQueryPacket);
+        if (socket != null) {
+        		socket.send(dnsQueryPacket);
+        } else {
+        		System.err.println("Socket has not been initialized"); 
+        }
 
         /* Handle response from server */
         byte[] receivedBuf = new byte[1024];
         DatagramPacket receivedPacket = new DatagramPacket(receivedBuf, receivedBuf.length);
+        if (socket != null) {
         socket.receive(receivedPacket);
+        } else {
+        		System.err.println("Socket has not been initialized");
+        }
 
         return receivedBuf;
     }

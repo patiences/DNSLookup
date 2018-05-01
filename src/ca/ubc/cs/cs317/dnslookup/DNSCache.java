@@ -75,8 +75,11 @@ public class DNSCache {
     public void forEachNode(BiConsumer<DNSNode, Set<ResourceRecord>> consumer) {
         for (Map.Entry<DNSNode, Map<ResourceRecord, ResourceRecord>> entry : cachedResults.entrySet()) {
             entry.getValue().keySet().removeIf(record -> !record.isStillValid());
-            if (!entry.getValue().keySet().isEmpty())
-                consumer.accept(entry.getKey(), entry.getValue().keySet());
+            if (!entry.getValue().keySet().isEmpty()) {
+            		Map<ResourceRecord, ResourceRecord> value = entry.getValue();
+            		Set<ResourceRecord> records = value.keySet();
+                consumer.accept(entry.getKey(), records);
+            }
         }
     }
 
